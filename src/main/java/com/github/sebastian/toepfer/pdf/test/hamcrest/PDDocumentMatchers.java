@@ -1,6 +1,9 @@
 package com.github.sebastian.toepfer.pdf.test.hamcrest;
 
 import com.github.sebastian.toepfer.pdf.test.hamcrest.ContainsText.PDDocumentContainsTextMatcher;
+import org.hamcrest.Matcher;
+
+import static org.hamcrest.Matchers.containsString;
 
 /**
  *
@@ -14,6 +17,10 @@ public final class PDDocumentMatchers {
     }
 
     public static PDDocumentContainsTextMatcher containsText(final String text) {
+        return containsText(containsString(text));
+    }
+
+    public static PDDocumentContainsTextMatcher containsText(final Matcher<String> text) {
         return ContainsText.contains(text);
     }
 

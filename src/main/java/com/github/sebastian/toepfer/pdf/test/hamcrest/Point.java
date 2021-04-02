@@ -67,7 +67,7 @@ class Point {
 
         @Override
         public void describeTo(final Description d) {
-            d.appendText(" at position x ")
+            d.appendText(" at position were x ")
                     .appendDescriptionOf(x)
                     .appendText(" and y ")
                     .appendDescriptionOf(y);

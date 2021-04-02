@@ -31,30 +31,44 @@ import static org.hamcrest.Matchers.is;
  */
 class ContainsText {
 
-    static PDDocumentContainsTextMatcher contains(final String text) {
+    static PDDocumentContainsTextMatcher contains(final Matcher<String> text) {
         return new PDDocumentContainsTextMatcher(text);
     }
 
     public static class PDDocumentContainsTextMatcher extends TypeSafeMatcher<PDDocument> {
 
-        private final String text;
+        private final Matcher<String> text;
         private final Matcher<Point> position;
+        private final Matcher<Float> leading;
 
-        PDDocumentContainsTextMatcher(final String text) {
+        PDDocumentContainsTextMatcher(final Matcher<String> text) {
             this(text, allwaysMatch());
         }
 
-        PDDocumentContainsTextMatcher(final String text, final Matcher<Point> position) {
+        PDDocumentContainsTextMatcher(final Matcher<String> text, final Matcher<Point> position) {
+            this(text, position, allwaysMatch());
+        }
+
+        PDDocumentContainsTextMatcher(final Matcher<String> text, final Matcher<Point> position, final Matcher<Float> leading) {
             this.text = Objects.requireNonNull(text);
             this.position = Objects.requireNonNull(position);
+            this.leading = Objects.requireNonNull(leading);
         }
 
         public PDDocumentContainsTextMatcher atPosition(final float x, final float y) {
             return atPosition(is(x), is(y));
         }
 
-        private PDDocumentContainsTextMatcher atPosition(final Matcher<Float> x, final Matcher<Float> y) {
-            return new PDDocumentContainsTextMatcher(text, Point.Matcher.atPosition(x, y));
+        public PDDocumentContainsTextMatcher atPosition(final Matcher<Float> x, final Matcher<Float> y) {
+            return new PDDocumentContainsTextMatcher(text, Point.Matcher.atPosition(x, y), leading);
+        }
+
+        public PDDocumentContainsTextMatcher withLeading(final float leading) {
+            return withLeading(is(leading));
+        }
+
+        public PDDocumentContainsTextMatcher withLeading(final Matcher<Float> leading) {
+            return new PDDocumentContainsTextMatcher(text, position, leading);
         }
 
         @Override
@@ -69,12 +83,16 @@ class ContainsText {
         }
 
         private Matcher<Text> asTextMatcher() {
-            return new Text.Matcher(is(text), position);
+            return new Text.Matcher(text, position, leading);
         }
 
         @Override
         public void describeTo(final Description desc) {
-            desc.appendText("pdf document contains ").appendText(text);
+            desc.appendText("pdf document contains as text ")
+                    .appendDescriptionOf(text)
+                    .appendDescriptionOf(position)
+                    .appendText(" and leading ")
+                    .appendDescriptionOf(leading);
         }
 
         private Collection<Text> extractTextFrom(final PDPageTree pages) throws IOException {
@@ -109,6 +127,10 @@ class ContainsText {
                         case OperatorName.NEXT_LINE:
                             builder.appendText('\n');
                             break;
+                        case OperatorName.SET_TEXT_LEADING:
+                            if (numbers.size() == 1) {
+                                builder.leading(numbers.get(0));
+                            }
                         case OperatorName.END_TEXT:
                             result.add(builder.build());
                             break;

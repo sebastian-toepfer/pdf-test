@@ -15,10 +15,12 @@ class Text {
 
     private final Point point;
     private final String content;
+    private final float leading;
 
-    public Text(final Point point, final String content) {
+    private Text(final Point point, final String content, final float leading) {
         this.point = point;
         this.content = content;
+        this.leading = leading;
     }
 
     Builder toBuilder() {
@@ -30,17 +32,26 @@ class Text {
 
         private final org.hamcrest.Matcher<String> contentMatcher;
         private final org.hamcrest.Matcher<Point> positionMatcher;
+        private final org.hamcrest.Matcher<Float> leadingMatcher;
 
         public Matcher(final org.hamcrest.Matcher<String> contentMatcher,
                 final org.hamcrest.Matcher<Point> positionMatcher) {
+            this(contentMatcher, positionMatcher, AllwaysMatch.allwaysMatch());
+        }
+
+        public Matcher(final org.hamcrest.Matcher<String> contentMatcher,
+                final org.hamcrest.Matcher<Point> positionMatcher,
+                final org.hamcrest.Matcher<Float> leadingMatcher) {
             this.contentMatcher = contentMatcher;
             this.positionMatcher = positionMatcher;
+            this.leadingMatcher = leadingMatcher;
         }
 
         @Override
         protected boolean matchesSafely(final Text t) {
             return contentMatcher.matches(t.content)
-                    && positionMatcher.matches(t.point);
+                    && positionMatcher.matches(t.point)
+                    && leadingMatcher.matches(t.leading);
         }
 
         @Override
@@ -48,7 +59,9 @@ class Text {
             d.appendText(" text with content")
                     .appendDescriptionOf(contentMatcher)
                     .appendText(" at position ")
-                    .appendDescriptionOf(positionMatcher);
+                    .appendDescriptionOf(positionMatcher)
+                    .appendText(" with leading ")
+                    .appendDescriptionOf(leadingMatcher);
         }
 
     }
@@ -57,6 +70,7 @@ class Text {
 
         private final StringBuilder content;
         private Point point;
+        private float leading;
 
         private Builder() {
             content = new StringBuilder();
@@ -83,8 +97,13 @@ class Text {
             return this;
         }
 
+        public Builder leading(final float leading) {
+            this.leading = leading;
+            return this;
+        }
+
         public Text build() {
-            return new Text(point, content.toString());
+            return new Text(point, content.toString(), leading);
         }
 
     }
