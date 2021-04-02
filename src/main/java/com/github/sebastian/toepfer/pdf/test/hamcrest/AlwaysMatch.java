@@ -8,13 +8,13 @@ import org.hamcrest.TypeSafeMatcher;
  *
  * @author sebastian
  */
-final class AllwaysMatch<T> extends TypeSafeMatcher<T> {
+final class AlwaysMatch<T> extends TypeSafeMatcher<T> {
 
-    static <T> Matcher<T> allwaysMatch() {
-        return new AllwaysMatch<>();
+    static <T> Matcher<T> alwaysMatch() {
+        return new AlwaysMatch<>();
     }
 
-    private AllwaysMatch() {
+    private AlwaysMatch() {
     }
 
     @Override
