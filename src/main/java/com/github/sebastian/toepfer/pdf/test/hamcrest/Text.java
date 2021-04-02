@@ -55,10 +55,11 @@ class Text {
 
     static final class Builder {
 
+        private final StringBuilder content;
         private Point point;
-        private String content;
 
         private Builder() {
+            content = new StringBuilder();
         }
 
         public Builder atPosition(final Point point) {
@@ -67,12 +68,23 @@ class Text {
         }
 
         public Builder withText(final String content) {
-            this.content = content;
+            this.content.setLength(0);
+            this.content.append(content);
+            return this;
+        }
+
+        public Builder appendText(final char character) {
+            this.content.append(character);
+            return this;
+        }
+
+        public Builder appendText(final CharSequence charSequence) {
+            this.content.append(charSequence);
             return this;
         }
 
         public Text build() {
-            return new Text(point, content);
+            return new Text(point, content.toString());
         }
 
     }

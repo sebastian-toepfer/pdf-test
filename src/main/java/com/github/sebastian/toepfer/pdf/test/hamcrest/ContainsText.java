@@ -101,18 +101,21 @@ class ContainsText {
                         case OperatorName.BEGIN_TEXT:
                             builder = Text.builder();
                             break;
-                        case OperatorName.END_TEXT:
-                            result.add(builder.build());
-                            break;
                         case OperatorName.MOVE_TEXT:
                             if (numbers.size() == 2) {
                                 builder.atPosition(new Point(numbers.get(0), numbers.get(1)));
                             }
                             break;
+                        case OperatorName.NEXT_LINE:
+                            builder.appendText('\n');
+                            break;
+                        case OperatorName.END_TEXT:
+                            result.add(builder.build());
+                            break;
                     }
                     numbers.clear();
                 } else if (token instanceof COSString) {
-                    builder.withText(((COSString) token).getString());
+                    builder.appendText(((COSString) token).getString());
                 } else if (token instanceof COSNumber) {
                     numbers.add(((COSNumber) token).floatValue());
                 }
