@@ -1,5 +1,6 @@
 package com.github.sebastian.toepfer.pdf.test.hamcrest;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
 import static com.github.sebastian.toepfer.pdf.test.hamcrest.AllwaysMatch.allwaysMatch;
+import static com.github.sebastian.toepfer.pdf.test.hamcrest.ColorMatcher.hasColor;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 
@@ -40,6 +42,7 @@ class ContainsText {
         private final Matcher<String> text;
         private final Matcher<Point> position;
         private final Matcher<Float> leading;
+        private final Matcher<Color> color;
 
         PDDocumentContainsTextMatcher(final Matcher<String> text) {
             this(text, allwaysMatch());
@@ -49,10 +52,17 @@ class ContainsText {
             this(text, position, allwaysMatch());
         }
 
-        PDDocumentContainsTextMatcher(final Matcher<String> text, final Matcher<Point> position, final Matcher<Float> leading) {
+        PDDocumentContainsTextMatcher(final Matcher<String> text, final Matcher<Point> position,
+                final Matcher<Float> leading) {
+            this(text, position, leading, allwaysMatch());
+        }
+
+        PDDocumentContainsTextMatcher(final Matcher<String> text, final Matcher<Point> position,
+                final Matcher<Float> leading, final Matcher<Color> color) {
             this.text = Objects.requireNonNull(text);
             this.position = Objects.requireNonNull(position);
             this.leading = Objects.requireNonNull(leading);
+            this.color = color;
         }
 
         public PDDocumentContainsTextMatcher atPosition(final float x, final float y) {
@@ -69,6 +79,10 @@ class ContainsText {
 
         public PDDocumentContainsTextMatcher withLeading(final Matcher<Float> leading) {
             return new PDDocumentContainsTextMatcher(text, position, leading);
+        }
+
+        public PDDocumentContainsTextMatcher withColor(final Color color) {
+            return new PDDocumentContainsTextMatcher(text, position, leading, hasColor(color));
         }
 
         @Override
@@ -92,7 +106,9 @@ class ContainsText {
                     .appendDescriptionOf(text)
                     .appendDescriptionOf(position)
                     .appendText(" and leading ")
-                    .appendDescriptionOf(leading);
+                    .appendDescriptionOf(leading)
+                    .appendText(" and color ")
+                    .appendDescriptionOf(color);
         }
 
         private Collection<Text> extractTextFrom(final PDPageTree pages) throws IOException {
@@ -130,6 +146,10 @@ class ContainsText {
                         case OperatorName.SET_TEXT_LEADING:
                             if (numbers.size() == 1) {
                                 builder.leading(numbers.get(0));
+                            }
+                        case OperatorName.NON_STROKING_COLOR:
+                            if (numbers.size() == 3) {
+                                builder.color(numbers.get(0), numbers.get(1), numbers.get(2));
                             }
                         case OperatorName.END_TEXT:
                             result.add(builder.build());

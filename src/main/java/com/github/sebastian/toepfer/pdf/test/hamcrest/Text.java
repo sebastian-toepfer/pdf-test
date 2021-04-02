@@ -1,7 +1,10 @@
 package com.github.sebastian.toepfer.pdf.test.hamcrest;
 
+import java.awt.Color;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
+
+import static com.github.sebastian.toepfer.pdf.test.hamcrest.AllwaysMatch.allwaysMatch;
 
 /**
  *
@@ -16,11 +19,13 @@ class Text {
     private final Point point;
     private final String content;
     private final float leading;
+    private final Color color;
 
-    private Text(final Point point, final String content, final float leading) {
+    private Text(final Point point, final String content, final float leading, final Color color) {
         this.point = point;
         this.content = content;
         this.leading = leading;
+        this.color = color;
     }
 
     Builder toBuilder() {
@@ -33,25 +38,35 @@ class Text {
         private final org.hamcrest.Matcher<String> contentMatcher;
         private final org.hamcrest.Matcher<Point> positionMatcher;
         private final org.hamcrest.Matcher<Float> leadingMatcher;
+        private final org.hamcrest.Matcher<Color> colorMatcher;
 
         public Matcher(final org.hamcrest.Matcher<String> contentMatcher,
                 final org.hamcrest.Matcher<Point> positionMatcher) {
-            this(contentMatcher, positionMatcher, AllwaysMatch.allwaysMatch());
+            this(contentMatcher, positionMatcher, allwaysMatch());
         }
 
         public Matcher(final org.hamcrest.Matcher<String> contentMatcher,
                 final org.hamcrest.Matcher<Point> positionMatcher,
                 final org.hamcrest.Matcher<Float> leadingMatcher) {
+            this(contentMatcher, positionMatcher, leadingMatcher, allwaysMatch());
+        }
+
+        public Matcher(final org.hamcrest.Matcher<String> contentMatcher,
+                final org.hamcrest.Matcher<Point> positionMatcher,
+                final org.hamcrest.Matcher<Float> leadingMatcher,
+                final org.hamcrest.Matcher<Color> colorMatcher) {
             this.contentMatcher = contentMatcher;
             this.positionMatcher = positionMatcher;
             this.leadingMatcher = leadingMatcher;
+            this.colorMatcher = colorMatcher;
         }
 
         @Override
         protected boolean matchesSafely(final Text t) {
             return contentMatcher.matches(t.content)
                     && positionMatcher.matches(t.point)
-                    && leadingMatcher.matches(t.leading);
+                    && leadingMatcher.matches(t.leading)
+                    && colorMatcher.matches(t.color);
         }
 
         @Override
@@ -61,7 +76,9 @@ class Text {
                     .appendText(" at position ")
                     .appendDescriptionOf(positionMatcher)
                     .appendText(" with leading ")
-                    .appendDescriptionOf(leadingMatcher);
+                    .appendDescriptionOf(leadingMatcher)
+                    .appendText(" with color ")
+                    .appendDescriptionOf(colorMatcher);
         }
 
     }
@@ -71,6 +88,7 @@ class Text {
         private final StringBuilder content;
         private Point point;
         private float leading;
+        private Color color;
 
         private Builder() {
             content = new StringBuilder();
@@ -102,8 +120,12 @@ class Text {
             return this;
         }
 
+        void color(final float red, final float green, final float blue) {
+            this.color = new Color(red, green, blue);
+        }
+
         public Text build() {
-            return new Text(point, content.toString(), leading);
+            return new Text(point, content.toString(), leading, color);
         }
 
     }
