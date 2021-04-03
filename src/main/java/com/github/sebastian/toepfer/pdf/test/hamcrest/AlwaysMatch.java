@@ -1,14 +1,14 @@
 package com.github.sebastian.toepfer.pdf.test.hamcrest;
 
+import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 
 /**
  *
  * @author sebastian
  */
-final class AlwaysMatch<T> extends TypeSafeMatcher<T> {
+final class AlwaysMatch<T> extends BaseMatcher<T> {
 
     static <T> Matcher<T> alwaysMatch() {
         return new AlwaysMatch<>();
@@ -18,7 +18,7 @@ final class AlwaysMatch<T> extends TypeSafeMatcher<T> {
     }
 
     @Override
-    protected boolean matchesSafely(final T t) {
+    public boolean matches(final Object o) {
         return true;
     }
 
